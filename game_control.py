@@ -1,0 +1,190 @@
+import os
+import time
+import ctypes
+import pydirectinput
+import win32api
+import win32con
+import pygetwindow as gw
+
+user32 = ctypes.windll.user32
+kernel32 = ctypes.windll.kernel32
+
+ROBLOX_LINK = "roblox://experiences/start?placeId=1537690962"
+
+_log_callback = None
+
+def set_log_callback(callback):
+    global _log_callback
+    _log_callback = callback
+
+def _log(msg):
+    if _log_callback:
+        _log_callback(msg)
+    else:
+        print(msg)
+
+def join_game():
+    _log("launching game...")
+    os.startfile(ROBLOX_LINK)
+    _log("waiting")
+    time.sleep(15)
+
+def _attach_thread_input(hwnd):
+    """Attach the current thread's input queue to the foreground window's thread.
+    This ensures SendInput (used by pydirectinput) delivers events correctly
+    when called from a background thread."""
+    try:
+        foreground_tid = user32.GetWindowThreadProcessId(hwnd, None)
+        current_tid = kernel32.GetCurrentThreadId()
+        if foreground_tid != current_tid:
+            user32.AttachThreadInput(current_tid, foreground_tid, True)
+    except Exception as e:
+        _log(f"Note: AttachThreadInput failed (ignoring): {e}")
+
+def activate_roblox_window():
+    try:
+        rblx_window = gw.getWindowsWithTitle("Roblox")[0]
+        if not rblx_window.isActive:
+            try:
+                rblx_window.activate()
+            except Exception as e:
+                _log(f"Note: Error during window activation (ignoring): {e}")
+            time.sleep(1)
+            _log("roblox window focused.")
+        _attach_thread_input(rblx_window._hWnd)
+        return rblx_window
+    except IndexError:
+        _log("roblox window not found. retrying...")
+        time.sleep(1)
+        os.startfile(ROBLOX_LINK)
+        time.sleep(15)
+        try:
+            rblx_window = gw.getWindowsWithTitle("Roblox")[0]
+            try:
+                rblx_window.activate()
+            except Exception as e:
+                _log(f"Note: Error during window activation (ignoring): {e}")
+            time.sleep(1)
+            _attach_thread_input(rblx_window._hWnd)
+            return rblx_window
+        except IndexError:
+            _log("roblox window still not found after retry.")
+            return None
+
+def leave_game():
+    _log("leaving game...")
+    window = activate_roblox_window()
+    if not window:
+        return
+    time.sleep(0.2)
+    pydirectinput.press('esc')
+    time.sleep(0.3)
+    pydirectinput.press('l')
+    time.sleep(0.3)
+    pydirectinput.press('enter')
+    time.sleep(3)
+
+def reset_character():
+    _log("resetting character...")
+    window = activate_roblox_window()
+    if not window:
+        return
+    time.sleep(0.2)
+    pydirectinput.press('esc')
+    time.sleep(0.3)
+    pydirectinput.press('r')
+    time.sleep(0.3)
+    pydirectinput.press('enter')
+    time.sleep(6) # Wait for respawn
+
+def align_camera():
+    _log("aligning camera...")
+    window = activate_roblox_window()
+    if not window:
+        return
+
+    center_x = window.left + (window.width // 2)
+    center_y = window.top + (window.height // 2)
+
+    pydirectinput.click(center_x, center_y)
+    time.sleep(0.5)
+    
+    _log("zooming in")
+    for _ in range(5):
+        pydirectinput.press('i')
+    
+    _log("zooming out")
+    for _ in range(4):
+        pydirectinput.press('o')
+        time.sleep(0.05)
+
+    _log("dragging camera down")
+    win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0)
+    time.sleep(0.1)
+
+    for _ in range(20):
+        win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, 0, -20, 0, 0)
+        time.sleep(0.01)
+    win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0)
+    time.sleep(0.5)
+    pydirectinput.click(center_x, center_y)
+    
+
+
+    _log("moving camera left")
+    for _ in range(2):
+        pydirectinput.press('.')
+        time.sleep(0.05)
+
+    _log("camera aligned")
+    
+
+def align_camera2():
+    _log("aligning camera...")
+    window = activate_roblox_window()
+    if not window:
+        return
+
+    center_x = window.left + (window.width // 2)
+    center_y = window.top + (window.height // 2)
+
+    pydirectinput.click(center_x, center_y)
+    time.sleep(0.5)
+    
+    _log("zooming in")
+    for _ in range(5):
+        pydirectinput.press('i')
+    
+    _log("zooming out")
+    for _ in range(4):
+        pydirectinput.press('o')
+        time.sleep(0.05)
+
+    _log("dragging camera down")
+    win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0)
+    time.sleep(0.1)
+
+    for _ in range(20):
+        win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, 0, -20, 0, 0)
+        time.sleep(0.01)
+    win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0)
+    time.sleep(0.5)
+    pydirectinput.click(center_x, center_y)
+    _log("dragging camera down (again)")
+    win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0)
+    time.sleep(0.1)
+
+    for _ in range(20):
+        win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, 0, -20, 0, 0)
+        time.sleep(0.01)
+    win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0)
+    time.sleep(0.5)
+
+
+    _log("moving camera left")
+    for _ in range(2):
+        pydirectinput.press('.')
+        time.sleep(0.05)
+
+    _log("camera aligned")
+    
