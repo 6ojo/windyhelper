@@ -7,7 +7,8 @@
   <img src="images/quickstart.png" width="500"/>
 	<img src="images/advanced.png" width="500"/>
 </p>
-# how to use
+
+## how to use
 windows only sorry idk how to do mac
 download the [latest release](https://github.com/6ojo/windyhelper/releases) and run the exe, or
 
