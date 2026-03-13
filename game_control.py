@@ -30,9 +30,6 @@ def join_game():
     time.sleep(15)
 
 def _attach_thread_input(hwnd):
-    """Attach the current thread's input queue to the foreground window's thread.
-    This ensures SendInput (used by pydirectinput) delivers events correctly
-    when called from a background thread."""
     try:
         foreground_tid = user32.GetWindowThreadProcessId(hwnd, None)
         current_tid = kernel32.GetCurrentThreadId()
@@ -72,17 +69,16 @@ def activate_roblox_window():
             return None
 
 def leave_game():
-    _log("leaving game...")
+    _log("closing roblox")
     window = activate_roblox_window()
     if not window:
         return
     time.sleep(0.2)
-    pydirectinput.press('esc')
-    time.sleep(0.3)
-    pydirectinput.press('l')
-    time.sleep(0.3)
-    pydirectinput.press('enter')
-    time.sleep(3)
+    pydirectinput.keyDown('alt')
+    time.sleep(0.05)
+    pydirectinput.press('f4')
+    pydirectinput.keyUp('alt')
+    _log("roblox closed")
 
 def reset_character():
     _log("resetting character...")
@@ -91,11 +87,11 @@ def reset_character():
         return
     time.sleep(0.2)
     pydirectinput.press('esc')
-    time.sleep(0.3)
+    time.sleep(0.1)
     pydirectinput.press('r')
-    time.sleep(0.3)
+    time.sleep(0.1)
     pydirectinput.press('enter')
-    time.sleep(6) # Wait for respawn
+    time.sleep(6)
 
 def align_camera():
     _log("aligning camera...")
