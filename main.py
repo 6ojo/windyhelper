@@ -33,7 +33,6 @@ def main():
         if not detector.roi:
             print("Notice: You haven't calibrated the chime region yet.")
             try:
-                # We prompt them to calibrate initially
                 print("Please make sure Roblox is open for calibration.")
                 time.sleep(2)
                 detector.calibrate()
@@ -76,7 +75,7 @@ def main():
 
             print("Rejoining a new server...")
             leave_game()
-            time.sleep(5)
+            time.sleep(1)
     elif choice == '5':
         align_camera()
     elif choice == '6':
