@@ -185,6 +185,7 @@ class App(ctk.CTk):
                         align_camera()
 
                     self._set_step("Detecting...")
+                    time.sleep(0.5)  # small delay before detection
                     result = self._detector.detect_movement(duration=3)
 
                     if result is True:
