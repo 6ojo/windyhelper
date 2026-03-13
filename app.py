@@ -214,8 +214,6 @@ class App(ctk.CTk):
                     break
 
                 self._log_from_thread("Rejoining a new server...")
-                join_game()
-                time.sleep(5)
 
         except Exception as e:
             self._log_from_thread(f"Error: {e}")
