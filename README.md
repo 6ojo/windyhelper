@@ -32,6 +32,7 @@ use main if you want to use a terminal, or app for a simpler gui
  - people using cannon can sometimes cause a false positive
  - if the game spawns you backwards (camera not facing hives) it has no idea and will continue as normal
  - the screenshot gui is really ugly
+ - i shouldve used ahk but was too lazy and win32 sux
 
 ## thanks to
 
