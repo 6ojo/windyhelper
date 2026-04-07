@@ -74,10 +74,11 @@ def leave_game():
     if not window:
         return
     time.sleep(0.2)
-    pydirectinput.keyDown('alt')
+    pydirectinput.keyDown('esc')
     time.sleep(0.05)
-    pydirectinput.press('f4')
-    pydirectinput.keyUp('alt')
+    pydirectinput.press('l')
+    time.sleep(0.05)
+    pydirectinput.keyUp('enter')
     _log("roblox closed")
 
 def reset_character():
@@ -130,7 +131,7 @@ def align_camera():
     _log("moving camera left")
     for _ in range(2):
         pydirectinput.press('.')
-        time.sleep(0.05)
+        time.sleep(0.5)
 
     _log("camera aligned")
     
@@ -180,7 +181,7 @@ def align_camera2():
     _log("moving camera left")
     for _ in range(2):
         pydirectinput.press('.')
-        time.sleep(0.05)
+        time.sleep(0.5)
 
     _log("camera aligned")
     

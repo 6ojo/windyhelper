@@ -88,6 +88,7 @@ class ChimeDetector:
         }
 
         self.log("Detecting movement...")
+        time.sleep(0.5)
 
         with mss.mss() as sct:
             initial_img = np.array(sct.grab(monitor))
@@ -95,7 +96,7 @@ class ChimeDetector:
             variance = np.var(initial_gray)
 
             self.log(f"ROI Texture Variance: {variance:.2f}")
-            if variance < 100: # Threshold for "mostly flat sky"
+            if variance < 100: 
                 self.log("Chimes not found in ROI (variance too low). Probably facing the wrong way.")
                 return "missing"
 
