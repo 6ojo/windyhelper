@@ -10,6 +10,8 @@ user32 = ctypes.windll.user32
 kernel32 = ctypes.windll.kernel32
 
 ROBLOX_LINK = "roblox://experiences/start?placeId=1537690962"
+LOAD_COLOR = 0x00A85722  # #2257a8 in COLORREF (BGR) format
+LOAD_PIXEL = (800, 800)
 
 _log_callback = None
 
@@ -23,11 +25,24 @@ def _log(msg):
     else:
         print(msg)
 
+gdi32 = ctypes.windll.gdi32
+
+def _get_pixel_color(x, y):
+    hdc = user32.GetDC(0)
+    color = gdi32.GetPixel(hdc, x, y)
+    user32.ReleaseDC(0, hdc)
+    return color
+
 def join_game():
     _log("launching game...")
     os.startfile(ROBLOX_LINK)
-    _log("waiting")
-    time.sleep(15)
+    _log("waiting for loading screen...")
+    while _get_pixel_color(*LOAD_PIXEL) != LOAD_COLOR:
+        time.sleep(0.5)
+    _log("loading screen detected. waiting for game to load...")
+    while _get_pixel_color(*LOAD_PIXEL) == LOAD_COLOR:
+        time.sleep(0.5)
+    _log("game loaded.")
 
 def _attach_thread_input(hwnd):
     try:
@@ -104,16 +119,11 @@ def align_camera():
     center_y = window.top + (window.height // 2)
 
     pydirectinput.click(center_x, center_y)
-    time.sleep(0.5)
-    
-    _log("zooming in")
-    for _ in range(5):
-        pydirectinput.press('i')
-    
-    _log("zooming out")
+    time.sleep(0.2)
+
     for _ in range(4):
         pydirectinput.press('o')
-        time.sleep(0.05)
+        time.sleep(0.02)
 
     _log("dragging camera down")
     win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0)
@@ -123,16 +133,12 @@ def align_camera():
         win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, 0, -20, 0, 0)
         time.sleep(0.01)
     win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0)
-    time.sleep(0.5)
+    time.sleep(0.2)
     pydirectinput.click(center_x, center_y)
-    
-
 
     _log("moving camera left")
     for _ in range(2):
         pydirectinput.press('.')
-        time.sleep(0.5)
-
     _log("camera aligned")
     
 
@@ -146,16 +152,11 @@ def align_camera2():
     center_y = window.top + (window.height // 2)
 
     pydirectinput.click(center_x, center_y)
-    time.sleep(0.5)
-    
-    _log("zooming in")
-    for _ in range(5):
-        pydirectinput.press('i')
-    
-    _log("zooming out")
+    time.sleep(0.2)
+
     for _ in range(4):
         pydirectinput.press('o')
-        time.sleep(0.05)
+        time.sleep(0.02)
 
     _log("dragging camera down")
     win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0)
@@ -165,7 +166,7 @@ def align_camera2():
         win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, 0, -20, 0, 0)
         time.sleep(0.01)
     win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0)
-    time.sleep(0.5)
+    time.sleep(0.2)
     pydirectinput.click(center_x, center_y)
     _log("dragging camera down (again)")
     win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0)
@@ -175,13 +176,10 @@ def align_camera2():
         win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, 0, -20, 0, 0)
         time.sleep(0.01)
     win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0)
-    time.sleep(0.5)
-
+    time.sleep(0.2)
 
     _log("moving camera left")
     for _ in range(2):
         pydirectinput.press('.')
-        time.sleep(0.5)
-
     _log("camera aligned")
     

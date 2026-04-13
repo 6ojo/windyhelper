@@ -2,7 +2,6 @@ import customtkinter as ctk
 import threading
 import time
 import winsound
-from tkinter import messagebox
 from game_control import join_game, align_camera, leave_game, reset_character, set_log_callback, align_camera2
 from detector import ChimeDetector
 
@@ -22,6 +21,7 @@ class App(ctk.CTk):
         ctk.set_default_color_theme("dark-blue")
 
         self._stop_event = threading.Event()
+        self._continue_event = threading.Event()
         self._running = False
         self._server_count = 0
         self._calibrated_this_session = False
@@ -30,6 +30,7 @@ class App(ctk.CTk):
         self._detector = ChimeDetector(log_callback=self._log_from_thread)
 
         self._build_ui()
+        self.bind("<F4>", self._on_f4)
         self._append_log("Ready. Click Start to begin.")
 
     def _build_ui(self):
@@ -147,6 +148,10 @@ class App(ctk.CTk):
         self._log_from_thread("Stop requested. Finishing current step...")
         self._set_status("Stopping...")
 
+    def _on_f4(self, event=None):
+        if self._running:
+            self._continue_event.set()
+
     def _auto_loop(self):
         try:
             while not self._stop_event.is_set():
@@ -191,25 +196,23 @@ class App(ctk.CTk):
                     if result is True:
                         found_movement = True
                         break
-                    elif result == "obstructed":
-                        self._log_from_thread("Obstruction detected. Rejoining...")
-                        break
-                    elif result == "missing":
-                        self._log_from_thread(
-                            f"Chimes missing (Attempt {attempt+1}/{max_retries}). Resetting..."
-                        )
-                        if attempt < max_retries - 1:
-                            self._set_step("Resetting character...")
-                            reset_character()
-                        else:
-                            self._log_from_thread("Max retries reached for this server.")
                     else:
                         self._log_from_thread("Chimes are static.")
                         break
 
                 if found_movement:
                     self._alert_found()
-                    break
+                    self._continue_event.clear()
+                    while not self._stop_event.is_set():
+                        if self._continue_event.is_set():
+                            self._continue_event.clear()
+                            found_movement = False
+                            self._set_status("Running", AMBER)
+                            self._log_from_thread("Continuing search...")
+                            break
+                        time.sleep(0.1)
+                    if found_movement:
+                        break
 
                 if self._stop_event.is_set():
                     break
@@ -223,17 +226,14 @@ class App(ctk.CTk):
 
     def _alert_found(self):
         self._set_status("CHIMES MOVING!", GREEN)
-        self._set_step("Done!")
+        self._set_step("Waiting...")
         self._log_from_thread("something's alive in the ocean")
+        self._log_from_thread("Press F4 to continue searching, or STOP to quit.")
         self.after(0, self._flash_window)
         try:
             winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
         except Exception:
             pass
-        self.after(0, lambda: messagebox.showwarning(
-            "Movement Detected",
-            "Movement detected! Check the chimes.\n\n\nPlayers using the red cannon or balloons may trigger false alarms."
-        ))
 
     def _flash_window(self):
         self.attributes("-topmost", True)

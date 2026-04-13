@@ -78,7 +78,6 @@ class ChimeDetector:
 
         rect = self.get_roblox_window_rect()
         
-        # Adjust rect based on ROI
         x, y, w, h = self.roi
         monitor = {
             "top": rect["top"] + y,
@@ -90,45 +89,28 @@ class ChimeDetector:
         self.log("Detecting movement...")
         time.sleep(0.5)
 
-        with mss.mss() as sct:
-            initial_img = np.array(sct.grab(monitor))
-            initial_gray = cv2.cvtColor(initial_img, cv2.COLOR_BGRA2GRAY)
-            variance = np.var(initial_gray)
-
-            self.log(f"ROI Texture Variance: {variance:.2f}")
-            if variance < 100: 
-                self.log("Chimes not found in ROI (variance too low). Probably facing the wrong way.")
-                return "missing"
-
+        with mss.mss() as sct:            
             end_time = time.time() + duration
             frames = []
 
             while time.time() < end_time:
-                # Grab the region of interest
                 sct_img = sct.grab(monitor)
                 frame = np.array(sct_img)
-                gray = cv2.cvtColor(frame, cv2.COLOR_BGRA2GRAY)
-                gray = cv2.GaussianBlur(gray, (21, 21), 0)
-                frames.append(gray)
                 time.sleep(0.1)
 
         if len(frames) < 2:
             return False
 
-        # Calculate Structural Similarity Index between the first frame and all subsequent frames
+
         min_ssim = 1.0
         
         for i in range(1, len(frames)):
-            # compute SSIM between the first frame and the current frame
-            # This captures the maximum displacement during the 3 second window
             score, diff = ssim(frames[0], frames[i], full=True)
             if score < min_ssim:
                 min_ssim = score
 
-        # SSIM is 1.0 for identical images, so lower means more movement.
         self.log(f"Minimum SSIM Score: {min_ssim:.4f}")
         
-        # If the minimum structural similarity drops below a certain threshold, it's moving
         if min_ssim < 0.985:
             self.log("something is moving. probably chimes.")
             return True
