@@ -91,25 +91,11 @@ class ChimeDetector:
         time.sleep(0.5)
 
         with mss.mss() as sct:
-            initial_img = np.array(sct.grab(monitor))
-            initial_gray = cv2.cvtColor(initial_img, cv2.COLOR_BGRA2GRAY)
-            variance = np.var(initial_gray)
-
-            self.log(f"ROI Texture Variance: {variance:.2f}")
-            if variance < 100: 
-                self.log("Chimes not found in ROI (variance too low). Probably facing the wrong way.")
-                return "missing"
-
             end_time = time.time() + duration
             frames = []
 
             while time.time() < end_time:
-                # Grab the region of interest
-                sct_img = sct.grab(monitor)
-                frame = np.array(sct_img)
-                gray = cv2.cvtColor(frame, cv2.COLOR_BGRA2GRAY)
-                gray = cv2.GaussianBlur(gray, (21, 21), 0)
-                frames.append(gray)
+                frames.append(np.array(sct.grab(monitor)))
                 time.sleep(0.1)
 
         if len(frames) < 2:
@@ -121,7 +107,7 @@ class ChimeDetector:
         for i in range(1, len(frames)):
             # compute SSIM between the first frame and the current frame
             # This captures the maximum displacement during the 3 second window
-            score, diff = ssim(frames[0], frames[i], full=True)
+            score, diff = ssim(frames[0], frames[i], full=True, channel_axis=-1)
             if score < min_ssim:
                 min_ssim = score
 
