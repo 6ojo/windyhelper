@@ -18,6 +18,8 @@ download the [latest release](https://github.com/6ojo/windyhelper/releases) and 
 clone the repo to where you want
 navigate to where it is
 > ```pip install -r requirements.txt```
+
+then 
 > ```python main.py``` 
 >or
 >```python app.py```
